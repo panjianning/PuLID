@@ -309,6 +309,7 @@ def download_pretrained(
     target = ''
     if not cfg:
         return target
+    print("download_pretrained",cfg, cache_dir)
 
     download_url = cfg.get('url', '')
     download_hf_hub = cfg.get('hf_hub', '')
@@ -319,6 +320,14 @@ def download_pretrained(
     if download_url:
         target = download_pretrained_from_url(download_url, cache_dir=cache_dir)
     elif download_hf_hub:
+        
+        if cache_dir:
+            filename = download_hf_hub.split('/')[-1]
+            download_target = os.path.join(cache_dir, filename)
+            print(download_target)
+            if os.path.exists(download_target) and os.path.isfile(download_target):
+                return download_target
+        
         has_hf_hub(True)
         # we assume the hf_hub entries in pretrained config combine model_id + filename in
         # 'org/model_name/filename.pt' form. To specify just the model id w/o filename and
