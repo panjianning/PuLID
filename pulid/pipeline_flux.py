@@ -19,7 +19,7 @@ from pulid.utils import img2tensor, tensor2img
 
 
 class PuLIDPipeline(nn.Module):
-    def __init__(self, dit, device, weight_dtype=torch.bfloat16, onnx_provider='gpu', *args, **kwargs):
+    def __init__(self, dit, device, weight_dtype=torch.bfloat16, onnx_provider='gpu',cache_dir=None, *args, **kwargs):
         super().__init__()
         self.device = device
         self.weight_dtype = weight_dtype
@@ -55,7 +55,7 @@ class PuLIDPipeline(nn.Module):
         self.face_helper.face_parse = None
         self.face_helper.face_parse = init_parsing_model(model_name='bisenet', device=self.device)
         # clip-vit backbone
-        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True)
+        model, _, _ = create_model_and_transforms('EVA02-CLIP-L-14-336', 'eva_clip', force_custom_clip=True, cache_dir=cache_dir)
         model = model.visual
         self.clip_vision_model = model.to(self.device, dtype=self.weight_dtype)
         eva_transform_mean = getattr(self.clip_vision_model, 'image_mean', OPENAI_DATASET_MEAN)
@@ -67,7 +67,7 @@ class PuLIDPipeline(nn.Module):
         self.eva_transform_mean = eva_transform_mean
         self.eva_transform_std = eva_transform_std
         # antelopev2
-        snapshot_download('DIAMONIK7777/antelopev2', local_dir='models/antelopev2')
+        # snapshot_download('DIAMONIK7777/antelopev2', local_dir='models/antelopev2')
         providers = ['CPUExecutionProvider'] if onnx_provider == 'cpu' \
             else ['CUDAExecutionProvider', 'CPUExecutionProvider']
         self.app = FaceAnalysis(name='antelopev2', root='.', providers=providers)
